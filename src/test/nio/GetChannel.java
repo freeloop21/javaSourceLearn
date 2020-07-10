@@ -7,6 +7,9 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+/**
+ * 《Java编程思想》
+ */
 public class GetChannel {
     private static String name = "data.txt";
     private static final int BSIZE = 1024;
