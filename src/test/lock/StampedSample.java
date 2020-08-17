@@ -5,7 +5,8 @@ import javax.xml.crypto.Data;
 import java.util.concurrent.locks.StampedLock;
 
 /**
- * 极客时间第16讲例子
+ * 极客时间第16讲"synchronized底层如何实现？什么是锁的升级、降级？"例子
+ * writeLock 和 unLockWrite
  */
 public class StampedSample {
     private final StampedLock sl = new StampedLock();

@@ -75,7 +75,7 @@ public class DemoServer extends Thread {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                ;
+
             }
         }
     }
@@ -169,7 +169,7 @@ class NIOServer extends Thread {
  * 业务逻辑的关键在于，通过指定 CompletionHandler 回调接口，在 accept/read/write 等关键节点，
  * 通过事件机制调用，这是非常不同的一种编程思路。
  */
-/*AsynchronousServerSocketChannel serverSock =        AsynchronousServerSocketChannel.open().bind(sockAddr);
+/*AsynchronousServerSocketChannel serverSock = AsynchronousServerSocketChannel.open().bind(sockAddr);
 serverSock.accept(serverSock, new CompletionHandler<>() { //为异步操作指定CompletionHandler回调函数
     @Override
     public void completed(AsynchronousSocketChannel sockChannel, AsynchronousServerSocketChannel serverSock) {
