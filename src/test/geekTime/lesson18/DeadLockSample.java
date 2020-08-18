@@ -1,11 +1,4 @@
-package test.lock;
-
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadInfo;
-import java.lang.management.ThreadMXBean;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+package test.geekTime.lesson18;
 
 /**
  * 极客时间"第18讲 | 什么情况下Java程序会产生死锁？如何定位、修复？"例子
@@ -21,7 +14,7 @@ public class DeadLockSample extends Thread {
         this.second = second;
     }
 
-    public  void run() {
+    public void run() {
         synchronized (first) {
             System.out.println(this.getName() + " obtained: " + first);
             try {
@@ -30,7 +23,7 @@ public class DeadLockSample extends Thread {
                     System.out.println(this.getName() + " obtained: " + second);
                 }
             } catch (InterruptedException e) {
-                // Do nothing
+                System.out.println(e.getMessage());
             }
         }
     }

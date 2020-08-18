@@ -1,4 +1,4 @@
-package test.lock;
+package test.geekTime.lesson16;
 
 
 import java.util.Map;

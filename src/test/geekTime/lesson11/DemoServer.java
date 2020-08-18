@@ -1,4 +1,4 @@
-package test.nio;
+package test.geekTime.lesson11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
