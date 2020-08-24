@@ -334,6 +334,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      * to incorporate impact of the highest bits that would otherwise
      * never be used in index calculations because of table bounds.
      */
+    // 这是因为有些数据计算出的哈希值差异主要在高位，而 HashMap 里的哈希寻址是忽略容量以上的高位的，那么这种处理就可以有效避免类似情况下的哈希碰撞。
     static final int hash(Object key) {
         int h;
         return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
@@ -626,6 +627,8 @@ public class HashMap<K,V> extends AbstractMap<K,V>
                    boolean evict) {
         Node<K,V>[] tab; Node<K,V> p; int n, i;
         if ((tab = table) == null || (n = tab.length) == 0)
+            // 如果表格是 null，resize 方法会负责初始化它，这从 tab = resize() 可以看出。
+            // resize 方法兼顾两个职责，创建初始存储表格，或者在容量不满足需求的时候，进行扩容（resize）。
             n = (tab = resize()).length;
         if ((p = tab[i = (n - 1) & hash]) == null)
             tab[i] = newNode(hash, key, value, null);
@@ -641,6 +644,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
                     if ((e = p.next) == null) {
                         p.next = newNode(hash, key, value, null);
                         if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                            // 树化
                             treeifyBin(tab, hash);
                         break;
                     }
@@ -659,6 +663,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
             }
         }
         ++modCount;
+        // 在放置新的键值对的过程中，如果发生下面条件，就会发生扩容。
         if (++size > threshold)
             resize();
         afterNodeInsertion(evict);
@@ -674,6 +679,9 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      *
      * @return the table
      */
+    // 门限值等于（负载因子）x（容量），如果构建 HashMap 的时候没有指定它们，那么就是依据相应的默认常量值。
+    // 门限通常是以倍数进行调整 （newThr = oldThr << 1），我前面提到，根据 putVal 中的逻辑，当元素个数超过门限大小时，则调整 Map 大小。
+    // 扩容后，需要将老的数组中的元素重新放置到新的数组，这是扩容的一个主要开销来源。
     final Node<K,V>[] resize() {
         Node<K,V>[] oldTab = table;
         int oldCap = (oldTab == null) ? 0 : oldTab.length;

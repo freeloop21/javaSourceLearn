@@ -1016,6 +1016,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
             if (tab == null || (n = tab.length) == 0)
                 tab = initTable();
             else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
+                // 利用CAS去进行无锁线程安全操作，如果bin是空的
                 if (casTabAt(tab, i, null,
                              new Node<K,V>(hash, key, value, null)))
                     break;                   // no lock when adding to empty bin
@@ -1024,7 +1025,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
                 tab = helpTransfer(tab, f);
             else {
                 V oldVal = null;
-                synchronized (f) {
+                synchronized (f) {// 细粒度的同步修改操作
                     if (tabAt(tab, i) == f) {
                         if (fh >= 0) {
                             binCount = 1;
@@ -1058,6 +1059,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
                         }
                     }
                 }
+                // Bin超过阈值，进行树化
                 if (binCount != 0) {
                     if (binCount >= TREEIFY_THRESHOLD)
                         treeifyBin(tab, i);
@@ -2223,9 +2225,11 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
     private final Node<K,V>[] initTable() {
         Node<K,V>[] tab; int sc;
         while ((tab = table) == null || tab.length == 0) {
+            // 如果发现冲突，进行spin等待
             if ((sc = sizeCtl) < 0)
                 Thread.yield(); // lost initialization race; just spin
             else if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) {
+                // CAS成功返回true，则进入真正的初始化逻辑
                 try {
                     if ((tab = table) == null || tab.length == 0) {
                         int n = (sc > 0) ? sc : DEFAULT_CAPACITY;

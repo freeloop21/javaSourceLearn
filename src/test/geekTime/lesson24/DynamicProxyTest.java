@@ -7,6 +7,12 @@ import java.lang.reflect.Proxy;
 /**
  * 第24讲 | 有哪些方法可以在运行时动态生成一个Java类？
  * 动态代理例子
+ *
+ * InvocationHandler ： Proxy.newProxyInstance生成动态代理类时会传入InvocationHandler 对象，
+ * 之后代理类调用方法后会自动调用这个invoke方法利用反射（method.invoke(maotaiJiu, args)），从而在调用方法前后增加其他的代码。
+ *
+ * 注意在GuitaiA的构造方法要传入一个对象（类型为Object，因为Proxy.newProxyInstance 可以根据前两个参数生成不同类型的代理类（）），
+ * 这个对象在invoke时传入说明是哪个对象调用的这个方法。
  */
 public class DynamicProxyTest {
 
