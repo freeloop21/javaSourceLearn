@@ -15,6 +15,11 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 举个收快递的例子不知道理解是否正确。
@@ -54,6 +59,20 @@ import java.util.Set;
 public class DemoServer extends Thread {
     private ServerSocket serverSocket;
 
+    private CountDownLatch latch;
+
+    private ExecutorService executorService;
+
+    private DemoServer(){
+
+    }
+
+    public DemoServer(CountDownLatch latch, ExecutorService executorService) {
+        this.latch = latch;
+        this.executorService = executorService;
+    }
+
+
     public int getPort() {
         return serverSocket.getLocalPort();
     }
@@ -61,12 +80,14 @@ public class DemoServer extends Thread {
     public void run() {
         try {
             serverSocket = new ServerSocket(0);
+            latch.countDown();
+
             while (true) {
-                Socket socket = serverSocket.accept();
+                Socket socket = serverSocket.accept();//一个accept对应一个请求连接
                 RequestHandler requestHandler = new RequestHandler(socket);
-                requestHandler.start();
+                executorService.submit(requestHandler);
             }
-        } catch (IOException e) {
+        } catch (IOException  e) {
             e.printStackTrace();
         } finally {
             if (serverSocket != null) {
@@ -80,12 +101,20 @@ public class DemoServer extends Thread {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        DemoServer server = new DemoServer();
+    public static void main(String[] args) throws IOException, InterruptedException {
+        CountDownLatch lock = new CountDownLatch(1);
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
+
+        DemoServer server = new DemoServer(lock, executorService);
         server.start();
-        try (Socket client = new Socket(InetAddress.getLocalHost(), server.getPort())) {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            bufferedReader.lines().forEach(s -> System.out.println(s));
+
+        lock.await();
+
+        for (int i = 0; i < 10; i++) {
+            try (Socket client = new Socket(InetAddress.getLocalHost(), server.getPort())) {
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(client.getInputStream()));
+                bufferedReader.lines().forEach(s -> System.out.println(s));
+            }
         }
     }
 }
